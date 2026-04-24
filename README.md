@@ -112,8 +112,4 @@ The results validate the computational workflow and demonstrate how RNA-seq anal
 
 ## 🔁 Reproducibility
 
-Run the full pipeline:
-
-```bash
-Rscript scripts/02_deseq2_analysis.R
-Rscript scripts/03_enrichment_analysis.R
+Work in progress
