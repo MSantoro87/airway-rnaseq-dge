@@ -59,4 +59,4 @@ These results validate the computational workflow and illustrate how RNA-seq ana
 ## Next Steps
 - Interpret GO/KEGG results
 - Write biological interpretation
-- Optional: add Python ML step
+- Add Python ML step
