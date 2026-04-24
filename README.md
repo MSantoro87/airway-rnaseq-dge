@@ -1,62 +1,119 @@
-# RNA-seq Differential Expression (Airway)
+# RNA-seq Differential Expression Analysis (Airway Dataset)
 
-## Date
-2026-04-24
+## 📌 Overview
+This project performs a complete RNA-seq differential expression analysis workflow using the **airway dataset** from Bioconductor. The goal is to identify gene expression changes in human airway smooth muscle cells following **dexamethasone treatment**.
 
-## Objective
-Analyze gene expression changes in airway cells after dexamethasone treatment.
+The project demonstrates a reproducible computational biology pipeline including:
+- Differential expression analysis (DESeq2)
+- Data visualization (volcano plot, heatmap)
+- Functional enrichment analysis (GO, KEGG)
 
-## Dataset
-- Bioconductor: `airway`
-- 8 samples (trt vs untrt)
+---
 
-## Environment
-- Ubuntu 20.04
-- R 4.5.2
-- Key packages: DESeq2, ggplot2, pheatmap, EnhancedVolcano, enrichR
+## 🎯 Objective
+To analyze transcriptional changes induced by dexamethasone and identify biologically relevant pathways associated with treatment response.
 
-## Steps Completed
-1. Loaded dataset and inspected metadata
-2. Built DESeq2 model: ~ cell + dex
-3. Ran differential expression (DESeq2)
-4. Generated plots:
-   - Volcano plot → `results/figures/volcano_plot.pdf`
-   - Heatmap (top 50 genes) → `results/figures/heatmap_top50.pdf`
-5. Extracted significant genes (padj < 0.05)
-6. Ran enrichment (GO + KEGG)
-7. Created GO barplot → `results/figures/go_barplot.pdf`
+---
 
-## Partial results (draft)
-- ~4000 significant genes (padj < 0.05)
-- Clear transcriptional response to dexamethasone
+## 🧬 Dataset
+- Source: Bioconductor `airway` package  
+- Samples: 8 (treated vs untreated)  
+- Data type: RNA-seq count data  
 
-## Results
+---
 
-### DE Analysis
+## ⚙️ Environment
+- OS: Ubuntu 20.04  
+- R version: 4.5.2  
 
-Differential gene expression analysis using DESeq2 identified approximately 4000 genes with significant expression changes (adjusted p-value < 0.05) between dexamethasone-treated and untreated airway smooth muscle cells. These results indicate a broad transcriptional response to glucocorticoid treatment.
+### Key packages
+- DESeq2  
+- ggplot2  
+- pheatmap  
+- EnhancedVolcano  
+- enrichR  
+
+---
+
+## 🧪 Workflow
+
+### 1. Data Loading & Exploration
+- Loaded dataset and inspected metadata
+- Identified experimental variables (`cell`, `dex`)
+
+### 2. Differential Expression Analysis
+- Built DESeq2 model: `~ cell + dex`
+- Controlled for donor variability
+- Performed statistical testing
+
+### 3. Visualization
+- Volcano plot  
+  → `results/figures/volcano_plot.pdf`  
+- Heatmap (top 50 genes)  
+  → `results/figures/heatmap_top50.pdf`  
+
+### 4. Gene Filtering
+- Selected significant genes:  
+  → adjusted p-value (`padj < 0.05`)
+
+### 5. Functional Enrichment
+- Gene Ontology (GO) analysis  
+- KEGG pathway analysis  
+- GO barplot visualization  
+  → `results/figures/go_barplot.pdf`  
+
+---
+
+## 📊 Results
+
+### Differential Expression
+Approximately **4000 genes** were identified as significantly differentially expressed (adjusted p-value < 0.05) between treated and untreated samples. This indicates a broad transcriptional response to dexamethasone.
 
 ### Visualization
+- The **volcano plot** shows a substantial number of both upregulated and downregulated genes.
+- The **heatmap** demonstrates clear clustering of samples by treatment condition, confirming a strong treatment-specific transcriptional signature.
 
-A volcano plot highlighted the distribution of significantly upregulated and downregulated genes, showing a balanced but substantial shift in gene expression upon treatment. A heatmap of the top 50 differentially expressed genes revealed clear clustering of samples according to treatment condition, confirming that dexamethasone induces a distinct transcriptional signature.
+### Functional Enrichment
+- GO analysis revealed enrichment in:
+  - immune response
+  - inflammatory signaling
+  - cellular stress processes  
 
-### Functional Enrichment Analysis
+- KEGG pathways highlighted:
+  - signaling and regulatory mechanisms
+  - pathways associated with glucocorticoid response  
 
-Gene Ontology (GO) enrichment analysis revealed that the differentially expressed genes are significantly associated with biological processes related to immune response, inflammatory signaling, and cellular stress pathways. These findings are consistent with the known anti-inflammatory and immunomodulatory effects of dexamethasone.
+---
 
-KEGG pathway analysis further supported these results, identifying pathways involved in signaling and regulatory mechanisms that are typically modulated by glucocorticoids.
+## 🧠 Interpretation
+Dexamethasone induces coordinated transcriptional changes affecting immune and inflammatory pathways. This is consistent with its known role as a **glucocorticoid with anti-inflammatory and immunomodulatory effects**.
 
-### Interpretation
+The results validate the computational workflow and demonstrate how RNA-seq analysis can uncover biologically meaningful patterns.
 
-Overall, the analysis demonstrates that dexamethasone treatment leads to coordinated changes in gene expression affecting immune and inflammatory processes. This is biologically plausible given the role of glucocorticoids in suppressing inflammation and regulating immune responses.
+---
 
-These results validate the computational workflow and illustrate how RNA-seq analysis can be used to uncover biologically meaningful patterns in gene expression data.
+## 📁 Project Structure
 
-## Notes / Issues
-- Fixed PDF device issue (`dev.off()`)
-- Switched to minimal package set (no tidyverse/clusterProfiler)
+---
 
-## Next Steps
-- Interpret GO/KEGG results
-- Write biological interpretation
-- Add Python ML step
+## ⚠️ Notes / Issues
+- Fixed plotting device issue using `dev.off()`
+- Simplified dependency stack (removed tidyverse/clusterProfiler)
+
+---
+
+## 🚀 Next Steps
+- Refine biological interpretation
+- Improve visualization quality
+- Add **Python-based machine learning analysis**
+- Apply pipeline to a **cancer RNA-seq dataset**
+
+---
+
+## 🔁 Reproducibility
+
+Run the full pipeline:
+
+```bash
+Rscript scripts/02_deseq2_analysis.R
+Rscript scripts/03_enrichment_analysis.R
