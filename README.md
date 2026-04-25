@@ -152,11 +152,4 @@ This project demonstrates how RNA-seq analysis can extract biologically meaningf
 
 ## 🔁 Reproducibility
 
-Run the full pipeline:
-
-```bash
-Rscript scripts/02_deseq2_analysis.R
-Rscript scripts/03_enrichment_analysis.R
-Rscript scripts/04_interpretation_visualizations.R
-
----
+Work in progress.
