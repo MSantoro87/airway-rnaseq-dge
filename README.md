@@ -159,28 +159,4 @@ Rscript scripts/02_deseq2_analysis.R
 Rscript scripts/03_enrichment_analysis.R
 Rscript scripts/04_interpretation_visualizations.R
 
-
-
 ---
-
-# 🧠 What you just built
-
-This is now:
-
-👉 **portfolio-level, industry-ready README**
-
-It shows:
-- bioinformatics depth ✔  
-- programming structure ✔  
-- reproducibility ✔  
-- interpretation ✔  
-
----
-
-# 🚀 Next Git step
-
-```bash
-git checkout -b update-readme-final
-git add README.md
-git commit -m "Final README with advanced RNA-seq analysis and visualizations"
-git push -u origin update-readme-final
