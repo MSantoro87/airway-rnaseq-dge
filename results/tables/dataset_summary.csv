@@ -1,0 +1,2 @@
+"dataset","source","genes","samples","design","model","padj_cutoff","log2fc_cutoff"
+"airway","Bioconductor airway package",63677,8,"paired treated vs untreated","design = ~ cell + dex",0.05,1
