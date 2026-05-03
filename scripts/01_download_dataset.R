@@ -1,52 +1,70 @@
-# 01_download_dataset.R
-#
-# Purpose:
-#   Download and store metadata for a publicly available RNA-seq dataset
-#   from the Gene Expression Omnibus (GEO). This script retrieves the
-#   dataset GSE183947 and saves it locally for downstream analysis.
-#
-# Input:
-#   - GEO dataset identifier:
-#       GSE183947
-#   - Internet connection to access GEO repository
-#
-# Output:
-#   - GEO metadata object saved as:
-#       data/raw/GSE183947_geo_metadata.rds
-#   - Printed summary of the dataset structure (ExpressionSet)
-#
-# Dependencies:
-#   - GEOquery (Bioconductor)
-#   - BiocManager (for installation if missing)
-#
-# Notes:
-#   - This script retrieves metadata only, not processed count matrices.
-#   - The saved RDS object can be reused without re-downloading the dataset.
-#
-# Example usage:
-#   Rscript scripts/01_download_dataset.R
-
+#!/usr/bin/env Rscript
 
 # 01_download_dataset.R
-# Goal: Download and inspect GEO dataset GSE183947
+# Purpose: Load the Bioconductor airway dataset and save standardized inputs
+# for downstream RNA-seq differential expression analysis.
 
-.libPaths(c("/home/mariano/R/library", .libPaths()))
+suppressPackageStartupMessages({
+  library(airway)
+  library(SummarizedExperiment)
+  library(yaml)
+})
 
-# Install GEOquery if missing
-if (!requireNamespace("GEOquery", quietly = TRUE)) {
-  BiocManager::install("GEOquery", lib = "/home/mariano/R/library")
-}
+# Load config
+config <- yaml::read_yaml("config/config.yaml")
 
-library(GEOquery)
+# Output directories
+dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
+dir.create("results/tables", recursive = TRUE, showWarnings = FALSE)
 
-# Download GEO metadata
-gse <- getGEO("GSE183947", GSEMatrix = TRUE)
+message("Loading Bioconductor airway dataset...")
 
-# Inspect object
-print(gse)
+data("airway")
 
-# Save metadata object
-saveRDS(gse, file = "data/raw/GSE183947_geo_metadata.rds")
+# Save full SummarizedExperiment object
+saveRDS(
+  airway,
+  file = "data/processed/airway.rds"
+)
 
-# Save processed data
-saveRDS(airway, "data/processed/airway.rds")
+# Extract count matrix and sample metadata
+count_matrix <- assay(airway)
+sample_metadata <- as.data.frame(colData(airway))
+
+# Save processed inputs for transparency
+write.csv(
+  count_matrix,
+  file = "data/processed/airway_counts.csv"
+)
+
+write.csv(
+  sample_metadata,
+  file = "data/processed/airway_sample_metadata.csv",
+  row.names = TRUE
+)
+
+# Save dataset summary
+dataset_summary <- data.frame(
+  dataset = "airway",
+  source = "Bioconductor airway package",
+  genes = nrow(count_matrix),
+  samples = ncol(count_matrix),
+  design = "paired treated vs untreated",
+  model = "design = ~ cell + dex",
+  padj_cutoff = config$padj_cutoff,
+  log2fc_cutoff = config$log2fc_cutoff
+)
+
+write.csv(
+  dataset_summary,
+  file = "results/tables/dataset_summary.csv",
+  row.names = FALSE
+)
+
+message("Dataset loading completed.")
+message("Genes: ", nrow(count_matrix))
+message("Samples: ", ncol(count_matrix))
+message("Saved: data/processed/airway.rds")
+message("Saved: data/processed/airway_counts.csv")
+message("Saved: data/processed/airway_sample_metadata.csv")
+message("Saved: results/tables/dataset_summary.csv")
