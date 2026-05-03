@@ -1,147 +1,67 @@
-# 02_deseq2_analysis.R
-#
-# Purpose:
-#   Perform differential gene expression analysis on RNA-seq count data
-#   using DESeq2. The script identifies genes that are significantly
-#   regulated in response to dexamethasone treatment in airway cells
-#   and generates a volcano plot for visualization.
-#
-# Input:
-#   - Airway RNA-seq dataset from Bioconductor (`airway` package)
-#   - Experimental design:
-#       ~ cell + dex
-#     where:
-#       cell = donor / biological replicate
-#       dex  = treatment condition (trt vs untrt)
-#
-# Output:
-#   - Differential expression results:
-#       results/tables/deseq2_results.csv
-#   - Volcano plot:
-#       results/figures/volcano_plot.pdf
-#
-# Method:
-#   - DESeq2 pipeline:
-#       1. Create DESeqDataSet
-#       2. Normalize counts
-#       3. Estimate dispersion
-#       4. Fit negative binomial model
-#       5. Perform statistical testing (Wald test)
-#
-# Notes:
-#   - The reference level for treatment is set to "untrt"
-#   - Results include log2 fold changes and adjusted p-values (FDR)
-#   - Volcano plot highlights significantly regulated genes
-#
-# Example usage:
-#   Rscript scripts/02_deseq2_analysis.R
-
+#!/usr/bin/env Rscript
 
 # 02_deseq2_analysis.R
-# Differential expression analysis using DESeq2 on airway dataset
+# Purpose: Perform differential expression analysis on the airway RNA-seq dataset.
 
-# Set library path
-.libPaths(c("/home/mariano/R/library", .libPaths()))
+suppressPackageStartupMessages({
+  library(DESeq2)
+  library(airway)
+})
 
-# Load libraries
-library(DESeq2)
-library(airway)
+dir.create("data/processed", recursive = TRUE, showWarnings = FALSE)
+dir.create("results/tables", recursive = TRUE, showWarnings = FALSE)
 
-# Load dataset
+message("Loading airway dataset...")
+
 data("airway")
 
-# Create DESeq2 dataset
 dds <- DESeqDataSet(
   airway,
   design = ~ cell + dex
 )
 
-# Set reference level
 dds$dex <- relevel(dds$dex, ref = "untrt")
 
-# Run DESeq2 analysis
+message("Running DESeq2 model: design = ~ cell + dex")
+
 dds <- DESeq(dds)
 
-# Extract results
-res <- results(dds, contrast = c("dex", "trt", "untrt"))
+res <- results(
+  dds,
+  contrast = c("dex", "trt", "untrt"),
+  alpha = 0.05
+)
 
-# Convert to data frame
 res_df <- as.data.frame(res)
 res_df$gene_id <- rownames(res_df)
 
-# Save results
-write.csv(
+res_df <- res_df[order(res_df$padj), ]
+
+sig_df <- subset(
   res_df,
-  "results/tables/deseq2_results.csv",
-  row.names = FALSE
+  !is.na(padj) & padj < 0.05
 )
 
-# Volcano plot
-library(EnhancedVolcano)
-
-pdf("results/figures/volcano_plot.pdf", width = 8, height = 7)
-
-EnhancedVolcano(
-  res,
-  lab = rownames(res),
-  x = "log2FoldChange",
-  y = "pvalue",
-  pCutoff = 0.05,
-  FCcutoff = 1,
-  title = "Differential Expression: Dexamethasone Treatment",
-  subtitle = "Airway RNA-seq dataset"
+up_df <- subset(
+  sig_df,
+  log2FoldChange > 1
 )
 
-dev.off()
-
-png("results/figures/volcano_plot.png", width = 1000, height = 800)
-
-EnhancedVolcano(
-  res,
-  lab = rownames(res),
-  x = "log2FoldChange",
-  y = "pvalue",
-  pCutoff = 0.05,
-  FCcutoff = 1,
-  title = "Differential Expression: Dexamethasone Treatment",
-  subtitle = "Airway RNA-seq dataset"
+down_df <- subset(
+  sig_df,
+  log2FoldChange < -1
 )
 
-dev.off()
+saveRDS(dds, "data/processed/deseq2_dds.rds")
+saveRDS(res, "data/processed/deseq2_results.rds")
 
+write.csv(res_df, "results/tables/deseq2_results_all.csv", row.names = FALSE)
+write.csv(sig_df, "results/tables/deseq2_results_significant.csv", row.names = FALSE)
+write.csv(up_df, "results/tables/deseq2_results_upregulated.csv", row.names = FALSE)
+write.csv(down_df, "results/tables/deseq2_results_downregulated.csv", row.names = FALSE)
 
-
-# Heatmap (top 50 genes)
-library(pheatmap)
-
-resOrdered <- res[order(res$pvalue), ]
-top_genes <- rownames(resOrdered)[1:50]
-
-normalized_counts <- counts(dds, normalized = TRUE)
-mat <- normalized_counts[top_genes, ]
-
-pdf("results/figures/heatmap_top50.pdf", width = 8, height = 10)
-
-pheatmap(
-  mat,
-  scale = "row",
-  show_rownames = FALSE,
-  main = "Top 50 Differentially Expressed Genes"
-)
-
-dev.off()
-
-cat("DESeq2 analysis completed. Results saved.\n")
-
-
-## After running DESeq2
-
-res <- results(dds)
-
-write.csv(as.data.frame(res),
-          "results/tables/deseq2_results_all.csv")
-
-sig <- subset(res, padj < 0.05)
-
-write.csv(as.data.frame(sig),
-          "results/tables/deseq2_results_significant.csv")
+message("DESeq2 analysis completed.")
+message("Total genes tested: ", nrow(res_df))
+message("Significant genes, padj < 0.05: ", nrow(sig_df))
+message("Upregulated genes, padj < 0.05 and log2FC > 1: ", nrow(up_df))
+message("Downregulated genes, padj < 0.05 and log2FC < -1: ", nrow(down_df))
