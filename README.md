@@ -70,6 +70,7 @@ The main output of this project is the Quarto HTML report:
 
 ```text
 reports/airway_rnaseq_report.html
+```
 
 The report includes:
 
