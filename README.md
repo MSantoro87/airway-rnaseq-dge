@@ -98,6 +98,7 @@ The report includes:
 
 The analysis is implemented as modular pipeline:
 
+```text
 scripts/
 ├── 00_check_environment.R
 ├── 01_download_dataset.R
@@ -106,6 +107,7 @@ scripts/
 ├── 04_interpretation_visualizations.R
 ├── 05_up_down_enrichment.R
 └── run_pipeline.sh
+```
 
 Pipeline steps
 
